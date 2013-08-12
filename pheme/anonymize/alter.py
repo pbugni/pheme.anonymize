@@ -123,7 +123,14 @@ def random_date_delta(delta_ballpark, format=None):
         """
         assert(initial)  # don't populate non existing field
         if format:
-            initial = datetime.datetime.strptime(initial, format)
+            try:
+                initial = datetime.datetime.strptime(initial, format)
+            except ValueError:
+                # handly sloppy input when missing time
+                if format == '%Y%m%d%H%M%S' and len(initial) == 8:
+                    initial = datetime.datetime.strptime(initial, '%Y%m%d')
+                else:
+                    raise
         result = initial + datetime.timedelta(seconds=delta)
         return result.strftime(format) if format else result
 
