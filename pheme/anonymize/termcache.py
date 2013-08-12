@@ -18,9 +18,9 @@ class TermCache(object):
         self.shelf = shelve.open(cachefile, writeback=True)
 
     def _convert_key(self, key):
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             return key
-        return key.__repr__()
+        return str(key)
 
     def __contains__(self, key):
         return self.shelf.__contains__(self._convert_key(key))
@@ -34,7 +34,7 @@ class TermCache(object):
         self.shelf[self._convert_key(key)] = value
 
     def __delitem__(self, key):
-        del self.shelf[key]
+        del self.shelf[self._convert_key(key)]
 
 
 tc = TermCache()  # module level singleton
