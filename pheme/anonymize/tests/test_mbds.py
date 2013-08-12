@@ -18,11 +18,11 @@ def test_bhs():
     components_to_hide = (
         "batchsendingapp",  # BHS-3.1
         "BSAID",  # BHS-3.2
-        "batchsendingfacility",  #BHS-4.1
+        "batchsendingfacility",  # BHS-4.1
         "BSFID",  # BHS-4.2
         "batchreceivingapp",  # BHS-5.1
         "BRAID",  # BHS-5.2
-        "batchreceivingfacility",  #BHS-6.1
+        "batchreceivingfacility",  # BHS-6.1
         "BRFID",  # BHS-6.2
         "20410209150319",  # BHS-7.1
         "batchcontrolid",  # BHS-11.1
@@ -48,11 +48,11 @@ def test_fhs():
     components_to_hide = (
         "filesendingapp",  # FHS-3.1
         "FSAID",  # FHS-3.2
-        "filesendingfacility",  #FHS-4.1
+        "filesendingfacility",  # FHS-4.1
         "FSFID",  # FHS-4.2
         "filereceivingapp",  # FHS-5.1
         "FRAID",  # FHS-5.2
-        "filereceivingfacility",  #FHS-6.1
+        "filereceivingfacility",  # FHS-6.1
         "FRFID",  # FHS-6.2
         "20211209113014",  # FHS-7.1
         "filecontrolid",  # FHS-11.1
@@ -78,11 +78,11 @@ def test_msh():
     components_to_hide = (
         "sendingapp",  # MSH-3.1
         "SAID",  # MSH-3.2
-        "sendingfacility",  #MSH-4.1
+        "sendingfacility",  # MSH-4.1
         "SFID",  # MSH-4.2
         "receivingapp",  # MSH-5.1
         "RAID",  # MSH-5.2
-        "eceivingfacility",  #MSH-6.1
+        "eceivingfacility",  # MSH-6.1
         "RFID",  # MSH-6.2
         "303012100908",  # MSH-7.1
         "1234567890303012100908143982",  # MSH-10.1
@@ -220,12 +220,10 @@ def test_obr():
 
     # confirm all required fields have been anonymized
     for component in components_to_hide:
-        if result.find(component) != -1:
-            import pdb; pdb.set_trace()
         assert(result.find(component) == -1)
 
 
-def test_pv1():
+def test_spm():
     spm = "MSH|^~\&|sendingapp^SAID|sendingfacility^SFID^NPI|"\
         "receivingapp^RAID^ISO|receivingfacility^RFID^ISO|"\
         "30301210090814||ADT^A08^ADT_A01|"\
