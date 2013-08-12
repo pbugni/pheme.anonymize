@@ -1,7 +1,7 @@
 from tempfile import NamedTemporaryFile
 import os
 
-from pheme.anonymize.mbds_hl7 import MBDS_anon, line_at_a_time
+from pheme.anonymize.mbds_hl7 import MBDS_anon, message_at_a_time
 
 
 # NB - the hl7 library requires batch encoding characters at[3:5] -
@@ -264,15 +264,29 @@ def test_reentrant():
     assert(result == result2)
 
 
-def test_fileline_generator():
-    input = ['one', 'two', 'three']
+def test_filemessage_generator():
+    # nest a multi segment message in the middle of 4 others
+    input = ['FHS|^~\&|fhs|components',
+             'BHS|^~\&|bhs|components',
+             'MSH|^~\&|msh|components',
+             'EVN|one|two|three',
+             'PID|four|five|six',
+             'MSH|^~\&|seven|eight']
     with NamedTemporaryFile(delete=False) as testcontents:
         testcontents.write('\r'.join(input))
     output = []
     try:
         with open(testcontents.name, 'rb') as infile:
-            for line in line_at_a_time(infile):
+            for line in message_at_a_time(infile):
                 output.append(line)
-        assert(input == output)
+        # First two msgs should be identical (minus line term)
+        assert(input[0] == output[0].rstrip())
+        assert(input[1] == output[1].rstrip())
+
+        # Next three should become one message
+        assert('\r'.join(input[2:5]) == ''.join(output[2:3]).rstrip())
+
+        # Last should also be identical
+        assert(input[-1:] == output[-1:])
     finally:
         os.remove(testcontents.name)

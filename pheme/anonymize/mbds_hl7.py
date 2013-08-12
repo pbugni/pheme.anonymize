@@ -48,22 +48,28 @@ class MBDS_anon(object):
         return str(unicode(self.msg))
 
 
-def line_at_a_time(fileobj):
-    """Generator to yield a line at a time till exhausted
+def message_at_a_time(fileobj):
+    """Generator to yield a complete HL/7 message at a time till exhausted
 
     :param fileobj: open filelike obj ready to read and yield a line at a time
 
     """
-    buffered = ''
-
-    for input in fileobj.readlines():
-        buffered += input
-        while buffered.find('\r') > 0:
-            line, partition, buffered = buffered.partition('\r')
-            yield line
-
-    if len(buffered):
-        yield buffered
+    field_sep = '|^~\&|'
+    segment_id_len = len('MSH')  # or 'FHS', 'BHS'...
+    input = fileobj.read()
+    msg_start = 0
+    # The field_sep is just beyond the message break.  Find and roll back
+    while msg_start < len(input):
+        start_search = msg_start + len(field_sep) + segment_id_len
+        next_sep = input.find(field_sep, start_search)
+        if next_sep != -1:
+            msg = input[msg_start:next_sep-segment_id_len]
+            msg_start = next_sep-segment_id_len
+            yield msg
+        else:
+            # Fell off end looking for next sep, return what's left
+            yield input[msg_start:]
+            break
     raise StopIteration
 
 
@@ -83,7 +89,7 @@ def anonymize_file():
         output = open(args.output, 'wb')
     else:
         output = sys.stdout
-    for nextline in line_at_a_time(args.file):
+    for nextline in message_at_a_time(args.file):
         parser = MBDS_anon(nextline)
         output.write(parser.anonymize())
         output.write('\r')
