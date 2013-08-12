@@ -24,6 +24,7 @@ def fixed_length_string(length, prefix=''):
 
     def fixed_len(initial):
         "returns string of fixed len - initial is ignored"
+        assert(initial)  # don't populate non existing field
         result = list(prefix)
         while len(result) < length:
             result.append(random.choice(ALPHA))
@@ -57,6 +58,7 @@ def fixed_length_digits(length, pointfrequency=None):
 
     def fixed_len(initial):
         "returns string of digits and dots of fixed len"
+        assert(initial)  # don't populate non existing field
         result = []
         i = 0
         nextpoint = random.choice(pointchoice)
@@ -119,6 +121,7 @@ def random_date_delta(delta_ballpark, format=None):
           defined when generating this method, a string in said format
 
         """
+        assert(initial)  # don't populate non existing field
         if format:
             initial = datetime.datetime.strptime(initial, format)
         result = initial + datetime.timedelta(seconds=delta)

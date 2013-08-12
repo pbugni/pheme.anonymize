@@ -32,6 +32,7 @@ class TermCache(object):
 
     def __setitem__(self, key, value):
         self.shelf[self._convert_key(key)] = value
+        self.shelf.sync()
 
     def __delitem__(self, key):
         del self.shelf[self._convert_key(key)]
