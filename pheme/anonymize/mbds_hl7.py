@@ -82,7 +82,7 @@ def anonymize_file():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("file", type=file, help="the file to anonymize")
-    parser.add_argument("-o", "--output", type=file,
+    parser.add_argument("-o", "--output",
                         help="file for output, by default hits stdout")
     args = parser.parse_args()
     if args.output:

@@ -3,7 +3,7 @@ import re
 
 from pheme.util.config import Config
 from pheme.anonymize.alter import fixed_length_digits, fixed_length_string
-from pheme.anonymize.alter import random_date_delta
+from pheme.anonymize.alter import random_date_delta, anon_term
 
 """Map message segments to the anonymize function needed
 
@@ -131,6 +131,7 @@ days = config.get("anonymize", "dayshift")
 """Define functions with parameters needed to anonymize fields"""
 dotted_sequence = fixed_length_digits(30, (1, 7))
 short_string = fixed_length_string(10)
+site_string = fixed_length_string(12, prefix="Site ")
 yyyymm = random_date_delta(datetime.timedelta(days=days), "%Y%m")
 ymdhms = random_date_delta(datetime.timedelta(days=days), "%Y%m%d%H%M%S")
 two_digits = fixed_length_digits(2)
@@ -154,7 +155,8 @@ def msg_control_id(initial):
     counter = initial[-4:]
     timestamp = initial[-18:-4]
     source_id = initial[:-18]
-    return ten_digits(source_id) + ymdhms(timestamp) + counter
+    return anon_term(source_id, ten_digits) +\
+        anon_term(timestamp, ymdhms) + counter
 
 
 def nested_dotted_sequence(initial):
@@ -168,8 +170,30 @@ def nested_dotted_sequence(initial):
         return initial
     parts = initial.split('&')
     if len(parts) < 3:
-        return '&' + dotted_sequence(initial) + '&ISO'
-    return '&'.join((parts[0], dotted_sequence(parts[1]), parts[2]))
+        return '&' + anon_term(initial, dotted_sequence) + '&ISO'
+    return '&'.join((anon_term(parts[0], ten_digits),
+                     anon_term(parts[1], dotted_sequence),
+                     parts[2]))
+
+
+def facility_subcomponents(initial):
+    """specialized anon function for PID-3.6
+
+    PID-3.6 makes use of sub-component separator '&'.  Handle here as
+    a shortcut to extending the depth of the anon engine.
+
+    Take care to check the cache for the first two sub-components as
+    they are also stand alone components (i.e. MSH-4.1, MSH-4.2)
+
+    """
+    if initial is None or len(initial) == 0:
+        return initial
+    parts = initial.split('&')
+    if len(parts) < 3:
+        return '&' + anon_term(initial, dotted_sequence) + '&NPI'
+    return '&'.join((anon_term(parts[0], site_string),
+                     anon_term(parts[1], dotted_sequence),
+                     parts[2]))
 
 
 def zipcode(initial):
@@ -210,7 +234,7 @@ anon_map['FHS-11.1'] = dotted_sequence
 
 anon_map['MSH-3.1'] = ten_digits
 anon_map['MSH-3.2'] = dotted_sequence
-anon_map['MSH-4.1'] = dotted_sequence
+anon_map['MSH-4.1'] = site_string
 anon_map['MSH-4.2'] = ten_digits
 anon_map['MSH-5.1'] = short_string
 anon_map['MSH-5.2'] = dotted_sequence
@@ -220,9 +244,13 @@ anon_map['MSH-7.1'] = ymdhms
 anon_map['MSH-10.1'] = dotted_sequence
 
 anon_map['EVN-2.1'] = ymdhms
+anon_map['EVN-3.1'] = ymdhms
+anon_map['EVN-7.1'] = short_string
+anon_map['EVN-7.2'] = ten_digits
 
 anon_map['PID-3.1'] = six_digits
 anon_map['PID-3.4'] = nested_dotted_sequence
+anon_map['PID-3.6'] = facility_subcomponents
 anon_map['PID-7.1'] = yyyymm
 anon_map['PID-11.5'] = zipcode
 anon_map['PID-18.1'] = six_digits
@@ -232,6 +260,8 @@ anon_map['PV1-3.2'] = six_digits
 anon_map['PV1-3.4'] = short_string
 anon_map['PV1-3.7'] = short_string
 anon_map['PV1-3.8'] = two_digits
+anon_map['PV1-19.4'] = facility_subcomponents
+anon_map['PV1-19.6'] = facility_subcomponents
 anon_map['PV1-44.1'] = ymdhms
 anon_map['PV1-45.1'] = ymdhms
 
@@ -249,5 +279,14 @@ anon_map['OBR-8.1'] = ymdhms
 anon_map['OBR-14.1'] = ymdhms
 anon_map['OBR-22.1'] = ymdhms
 
+anon_map['OBX-5.1'] = short_string
+anon_map['OBX-14.1'] = ymdhms
+anon_map['OBX-15.4'] = short_string
+
+anon_map['ORC-3.1'] = dotted_sequence
+anon_map['ORC-9.1'] = ymdhms
+
 anon_map['SPM-2.2'] = dotted_sequence
 anon_map['SPM-18.1'] = ymdhms
+
+anon_map['NTE-3.1'] = short_string

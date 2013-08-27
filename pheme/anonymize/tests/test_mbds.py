@@ -105,10 +105,14 @@ def test_evn():
         "receivingapp^RAID^ISO|receivingfacility^RFID^ISO|"\
         "30301210090814||ADT^A08^ADT_A01|"\
         "1234567890303012100908143982|P|2.5|||||||||Biosurveillance-1.0"\
-        "\rEVN|A08|303012091749"
+        "\rEVN|A01|303012091749|30300706172800||||"\
+        "eventfacility^EFID^NPI"
     mbds_anon = MBDS_anon(evn)
     result = mbds_anon.anonymize()
     assert(result.find("303012091749") == -1)
+    assert(result.find("30300706172800") == -1)
+    assert(result.find("eventfacility") == -1)
+    assert(result.find("EFID") == -1)
 
 
 def test_dg1():
@@ -248,6 +252,44 @@ def test_spm():
     # confirm all required fields have been anonymized
     for component in components_to_hide:
         assert(result.find(component) == -1)
+
+
+def test_nte():
+    nte = "MSH|^~\&|sendingapp^SAID|sendingfacility^SFID^NPI|"\
+        "receivingapp^RAID^ISO|receivingfacility^RFID^ISO|"\
+        "30301210090814||ADT^A08^ADT_A01|"\
+        "1234567890303012100908143982|P|2.5|||||||||Biosurveillance-1.0"\
+        "\rNTE|1||note text"
+    mbds_anon = MBDS_anon(nte)
+    result = mbds_anon.anonymize()
+    assert(result.find("note text") == -1)
+
+
+def test_obx():
+    obx = "MSH|^~\&|sendingapp^SAID|sendingfacility^SFID^NPI|"\
+        "receivingapp^RAID^ISO|receivingfacility^RFID^ISO|"\
+        "30301210090814||ADT^A08^ADT_A01|"\
+        "1234567890303012100908143982|P|2.5|||||||||Biosurveillance-1.0"\
+        "\rOBX|4|TX|41852-5^Microorganism or agent identified:"\
+        "Prid:Pt:XXX:Nom:^LN^RL^DFA^L|4.1|"\
+        "too many dates and addresses||||||F||||^^^labcode^^L"
+
+    mbds_anon = MBDS_anon(obx)
+    result = mbds_anon.anonymize()
+    assert(result.find("too many dates and addresses") == -1)
+    assert(result.find("labcode") == -1)
+
+
+def test_orc():
+    orc = "MSH|^~\&|sendingapp^SAID|sendingfacility^SFID^NPI|"\
+        "receivingapp^RAID^ISO|receivingfacility^RFID^ISO|"\
+        "30301210090814||ADT^A08^ADT_A01|"\
+        "1234567890303012100908143982|P|2.5|||||||||Biosurveillance-1.0"\
+        "\rORC|NW|613395|19950914:C00094R||||||199509141051"
+
+    mbds_anon = MBDS_anon(orc)
+    result = mbds_anon.anonymize()
+    assert(result.find("199509") == -1)
 
 
 def test_reentrant():
