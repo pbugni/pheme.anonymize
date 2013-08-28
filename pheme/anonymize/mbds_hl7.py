@@ -90,7 +90,7 @@ def anonymize_file():
     else:
         output = sys.stdout
     for nextline in message_at_a_time(args.file):
-        parser = MBDS_anon(nextline)
+        parser = MBDS_anon(nextline.replace('\n', '\r'))
         output.write(parser.anonymize())
         output.write('\r')
 

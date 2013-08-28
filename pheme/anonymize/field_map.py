@@ -159,38 +159,23 @@ def msg_control_id(initial):
         anon_term(timestamp, ymdhms) + counter
 
 
-def nested_dotted_sequence(initial):
-    """specialized anon function for PID-3.4
-
-    PID-3.4 makes use of sub-component separator '&'.  Handle here as
-    a shortcut to extending the depth of the anon engine.
-
-    """
-    if initial is None or len(initial) == 0:
-        return initial
-    parts = initial.split('&')
-    if len(parts) < 3:
-        return '&' + anon_term(initial, dotted_sequence) + '&ISO'
-    return '&'.join((anon_term(parts[0], ten_digits),
-                     anon_term(parts[1], dotted_sequence),
-                     parts[2]))
-
-
 def facility_subcomponents(initial):
-    """specialized anon function for PID-3.6
+    """specialized anon function for PID-3.4 and 3.6
 
-    PID-3.6 makes use of sub-component separator '&'.  Handle here as
-    a shortcut to extending the depth of the anon engine.
+    Some facility components make use of sub-component separator '&'.
+    Handle here as a shortcut to extending the depth of the anon
+    engine.
 
     Take care to check the cache for the first two sub-components as
-    they are also stand alone components (i.e. MSH-4.1, MSH-4.2)
+    they are also stand alone components (i.e. MSH-4.1, MSH-4.2) and
+    we'd like to substitute in the same values.
 
     """
     if initial is None or len(initial) == 0:
         return initial
     parts = initial.split('&')
     if len(parts) < 3:
-        return '&' + anon_term(initial, dotted_sequence) + '&NPI'
+        return anon_term(initial, dotted_sequence)
     return '&'.join((anon_term(parts[0], site_string),
                      anon_term(parts[1], dotted_sequence),
                      parts[2]))
@@ -207,6 +192,29 @@ def zipcode(initial):
     if len(initial) >= 3:
         return initial[:3] + two_digits(initial)
     return five_digits(initial)
+
+
+def type_and_magnitude(initial):
+    """return string matching type and magnitude
+
+    If initial looks like an integer, return string form of integer of
+    same magnitude.  Same idea for floating point values.  Otherwise
+    return a random short_string.
+
+    """
+    if initial is None or len(initial) == 0:
+        return initial
+    try:
+        value = int(initial)
+        return anon_term(initial, fixed_length_digits(len(initial)))
+    except ValueError:
+        try:
+            value = float(initial)
+            lenb4 = initial.find('.')
+            return anon_term(initial, fixed_length_digits(len(initial),
+                                                          (lenb4, lenb4+1)))
+        except ValueError:
+            return short_string(initial)
 
 
 anon_map = FieldMap()
@@ -245,11 +253,11 @@ anon_map['MSH-10.1'] = dotted_sequence
 
 anon_map['EVN-2.1'] = ymdhms
 anon_map['EVN-3.1'] = ymdhms
-anon_map['EVN-7.1'] = short_string
+anon_map['EVN-7.1'] = site_string
 anon_map['EVN-7.2'] = ten_digits
 
 anon_map['PID-3.1'] = six_digits
-anon_map['PID-3.4'] = nested_dotted_sequence
+anon_map['PID-3.4'] = facility_subcomponents
 anon_map['PID-3.6'] = facility_subcomponents
 anon_map['PID-7.1'] = yyyymm
 anon_map['PID-11.5'] = zipcode
@@ -279,7 +287,7 @@ anon_map['OBR-8.1'] = ymdhms
 anon_map['OBR-14.1'] = ymdhms
 anon_map['OBR-22.1'] = ymdhms
 
-anon_map['OBX-5.1'] = short_string
+anon_map['OBX-5.1'] = type_and_magnitude
 anon_map['OBX-14.1'] = ymdhms
 anon_map['OBX-15.4'] = short_string
 
