@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import shelve
 import sys
 
@@ -61,12 +62,26 @@ def lookup_term_ep():
     parser = argparse.ArgumentParser()
     parser.add_argument("term", help="lookup 'term' in termcache")
     args = parser.parse_args()
-    result = lookup_term(args.term)
+
+    if args.term.count(',') == 4:
+        # make it easy to convert datetime references
+        term = datetime.datetime(*(int(x) for x in args.term.split(',')))
+        result = lookup_term(term.strftime('%Y%m%d%H%M'))
+        dt = datetime.datetime.strptime(result, '%Y%m%d%H%M%S')
+        result = dt.strftime('%Y,%m,%d,%H,%M,%S')
+    elif args.term.count('^') == 3:
+        # lookup constituent visit / patient id parts
+        id = lookup_term(args.term[:args.term.index('^^^')])
+        org = lookup_term(args.term[args.term.index('^^^')+3:])
+        result = id + '^^^' + org
+    else:
+        result = lookup_term(args.term)
     if result is not None:
-        print "%s:%s" % (args.term, result)
+        #print "%s:%s" % (args.term, result)
+        print result
         return
     else:
-        print sys.stderr, "Not Found: '%s'" % args.term
+        print >> sys.stderr, "Not Found: '%s'" % args.term
         sys.exit(1)
 
 

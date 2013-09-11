@@ -262,12 +262,13 @@ anon_map['PID-3.6'] = facility_subcomponents
 anon_map['PID-7.1'] = yyyymm
 anon_map['PID-11.5'] = zipcode
 anon_map['PID-18.1'] = six_digits
-anon_map['PID-18.4'] = dotted_sequence
+anon_map['PID-18.4'] = facility_subcomponents
 
 anon_map['PV1-3.2'] = six_digits
 anon_map['PV1-3.4'] = short_string
 anon_map['PV1-3.7'] = short_string
 anon_map['PV1-3.8'] = two_digits
+anon_map['PV1-19.1'] = six_digits
 anon_map['PV1-19.4'] = facility_subcomponents
 anon_map['PV1-19.6'] = facility_subcomponents
 anon_map['PV1-44.1'] = ymdhms
