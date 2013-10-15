@@ -1,7 +1,7 @@
 import datetime
+import string
 from nose.tools import raises
 
-from pheme.anonymize.alter import ALPHA
 from pheme.anonymize.alter import fixed_length_string, fixed_length_digits
 from pheme.anonymize.alter import random_date_delta, anon_term
 from pheme.anonymize.termcache import delete_term
@@ -33,7 +33,7 @@ def test_string_func():
         l = longer("input")
         short_results[s] = True
         longer_results[l] = True
-    assert(len(short_results) == len(ALPHA))
+    assert(len(short_results) == len(string.ascii_lowercase))
     assert(len(longer_results) == num)
 
 

@@ -1,10 +1,8 @@
 import datetime
 import random
+import string
 
 from pheme.anonymize.termcache import lookup_term, store_term
-
-ALPHA = [c for c in 'abcdefghijklmnopqrstuvwxyz']
-DIGIT = [c for c in '0123456789']
 
 
 def fixed_length_string(length, prefix=''):
@@ -27,7 +25,7 @@ def fixed_length_string(length, prefix=''):
         assert(initial)  # don't populate non existing field
         result = list(prefix)
         while len(result) < length:
-            result.append(random.choice(ALPHA))
+            result.append(random.choice(string.ascii_lowercase))
         return ''.join(result).capitalize()
 
     return fixed_len
@@ -67,7 +65,7 @@ def fixed_length_digits(length, pointfrequency=None):
                 result.append('.')
                 nextpoint = i + 1 + random.choice(pointchoice)
             else:
-                result.append(random.choice(DIGIT))
+                result.append(random.choice(string.digits))
             i += 1
         return ''.join(result)
 
