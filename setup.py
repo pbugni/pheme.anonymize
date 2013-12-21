@@ -14,7 +14,7 @@ except IOError:
     README = ''
 
 setup(name='pheme.anonymize',
-      version='13.05',
+      version='13.12',
       description="PHEME module to anonymize syndromic data files",
       long_description=README,
       license="BSD-3 Clause",
