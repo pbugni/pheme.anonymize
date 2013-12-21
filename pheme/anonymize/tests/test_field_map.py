@@ -1,6 +1,11 @@
 from nose.tools import raises
 
-from pheme.anonymize.field_map import FieldMap, msg_control_id, type_and_magnitude
+from pheme.anonymize.field_map import (
+    FieldMap,
+    msg_control_id,
+    type_and_magnitude,
+    ten_digits_starting_w_1
+    )
 
 
 def test_valid_set():
@@ -48,3 +53,11 @@ def test_msgcontrolid():
     assert(fixed[-4:] == input[-4:])
     assert(fixed[:10] != input[:10])
     assert(len(fixed) == len(input))
+
+
+def test_npi():
+    # 10 digit NPI was causing integer overflow...
+    input = '1234554321'
+    result = ten_digits_starting_w_1(input)
+    assert(len(input) == len(result))
+    assert(input.startswith('1'))

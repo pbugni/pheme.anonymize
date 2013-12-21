@@ -137,8 +137,19 @@ ymdhms = random_date_delta(datetime.timedelta(days=days), "%Y%m%d%H%M%S")
 two_digits = fixed_length_digits(2)
 five_digits = fixed_length_digits(5)
 six_digits = fixed_length_digits(6)
+nine_digits = fixed_length_digits(9)
 ten_digits = fixed_length_digits(10)
 
+def ten_digits_starting_w_1(initial):
+    """specialized anon function for NPI like numbers
+
+    10 digits in length, starting w/ 1 to prevent integer overflow at
+    2,147,483,647
+
+    """
+    def one_and_nine(initial):
+        return '1' + nine_digits(initial)
+    return anon_term(initial, one_and_nine)
 
 def msg_control_id(initial):
     """specialized anon function for message control id
@@ -243,7 +254,7 @@ anon_map['FHS-11.1'] = dotted_sequence
 anon_map['MSH-3.1'] = ten_digits
 anon_map['MSH-3.2'] = dotted_sequence
 anon_map['MSH-4.1'] = site_string
-anon_map['MSH-4.2'] = ten_digits
+anon_map['MSH-4.2'] = ten_digits_starting_w_1
 anon_map['MSH-5.1'] = short_string
 anon_map['MSH-5.2'] = dotted_sequence
 anon_map['MSH-6.1'] = short_string
